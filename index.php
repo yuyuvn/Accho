@@ -66,6 +66,7 @@ if ($mode=="Process") {
 			}
 		}
 		
+		echo "//Add fields\n";
 		if (count($p) > 0) echo 'interpreter.addParamsList({' . implode(',',$p) . '});';
 		exit();
 	} elseif ($_REQUEST['js'] == "functions_declare") {
@@ -101,6 +102,7 @@ if ($mode=="Process") {
 				echo "/*\nERROR:\n".$e."\n*/";
 			}
 		}
+		echo "//Add functions\n";
 		if (count($fs) > 0) echo 'interpreter.addFunctions({' . implode(',',$fs) . '});';
 		exit();
 	}
