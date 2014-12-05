@@ -29,6 +29,7 @@ class check_email extends plugins {
 		$return = array();
 		$mail = $this->getEmailAddress($user);
 		$server = $this->searchServer($mail->domain);
+
 		if ($server!=false) {
 			if (!$this->getted) $this->addServer($mail->domain,$server);
 		} else {
@@ -77,7 +78,7 @@ class check_email extends plugins {
 		if ($s!=false) return $s;
 		if (getmxrr($domain,$mxhosts)) {
 			foreach ($mxhosts as $mx) {
-				$s = $this->getThunderBirdServer(getTopDomain($mx));
+				$s = $this->getThunderBirdServer($this->getTopDomain($mx));
 				if ($s!=false) return $s;
 			}
 		}
@@ -113,7 +114,7 @@ class check_email extends plugins {
 			$s = $db->getServer($domain);
 			if ($s!=false) {
 				if ($s->domain == "???") return -1;
-				elseif (testServer($s->domain,$s->port,$s->type,$s->socketType)!=false) return $s;
+				elseif ($this->testServer($s->domain,$s->port,$s->type,$s->socketType)!=false) return $s;
 				else $db->getted = false;
 			}
 		}
