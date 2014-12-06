@@ -28,7 +28,7 @@ abstract class plugins {
 	protected function connect($url,$ref = "",$data = null) {
 		$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_HEADER, 1);
-			curl_setopt($ch, CURLOPT_NOBODY, 1);
+			curl_setopt($ch, CURLOPT_NOBODY, 0);
 			curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
 			curl_setopt($ch, CURLOPT_COOKIEJAR, DIR."/cookies.cookie");
 			curl_setopt($ch, CURLOPT_COOKIEFILE, DIR."/cookies.cookie");
