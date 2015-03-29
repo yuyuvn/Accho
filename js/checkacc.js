@@ -4,6 +4,7 @@ var ajax;
 var worker;
 var prescan_success_callback;
 var requestData;
+var title;
 function setCookie(cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -20,6 +21,7 @@ function getCookie(cname) {
     return "";
 }
 $(function() {
+	title = document.title;
 	$('button:button[name="showTemplate"]').click(function() {
 		//$( "#outputTemplate" ).dialog("open");
 		showModal("Output theme",$("#ot_value").val(), function(event) {
@@ -146,7 +148,7 @@ function StopChecking() {
 	}
 	catch (err) {}
 	changeFavicon('ass/favicon.ico');
-	document.title = 'Check acc';
+	document.title = title;
 	if (worker) worker.terminate();
 	
 	jQuery(window).unbind("beforeunload");
@@ -219,7 +221,7 @@ function Processing(next) {
 		if (checking&&next) Processing(true);
 		return;
 	}
-	document.title = m[mc]+" - Check account";
+	document.title = m[mc]+" - "+title;
 	
 	worker = new Worker("js/worker.js");
 	worker.addEventListener('message', function(e) {
