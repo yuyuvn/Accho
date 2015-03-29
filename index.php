@@ -10,6 +10,7 @@ define('DB_NAME',"checkmail");
 set_time_limit(600);
 header('Content-type: text/html; charset=utf-8');
 define("DIR",dirname(__FILE__));
+define("VERSION", "1.0.0")
 
 require_once('includes.php');
 
@@ -110,8 +111,8 @@ if ($mode=="Process") {
 ?>
 <!DOCTYPE html><html>
 <head>
-<title>Check account</title>
-<style type="text/css">
+	<title>Accho v<?php echo VERSION ?></title>
+	<style type="text/css">
 .aqua {color: aqua}
 .blue {color: blue}
 .fuchsia {color: fuchsia}
@@ -130,48 +131,63 @@ if ($mode=="Process") {
 #loadingIMG {visibility:hidden}
 #columnlist {display:none;margin-top:5px}
 #result {max-height: 500px;overflow: auto}
-</style>
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<script src="checkacc.js"></script>
-<script src="outputtemplate.js"></script>
+	</style>
+	<link rel="stylesheet" href="bootstrap.min.css" />
 </head>
 <body>
-<form name="mform" action="<?php echo basename($_SERVER['PHP_SELF']) ?>" method="post" id="mform">
-<input type="hidden" name="ot_value" id="ot_value" value="{input}" />
-<div style="text-align:center">
-<div class="option">
-<textarea rows="15" cols="75" name="ml" id="ml">
-</textarea>
-<div style="margin-top: 10px">
-Seperator: <input type="text" value="|" name="sep" size="1"/>
-| <input type="checkbox" name="adc" checked id="adc" /> <label for="adc">Auto Detect Column</label>
-<div id="columnlist">
-User column (start from 0): <input type="text" value="1" name="mc" size="1"/>
-| Pass column: <input type="text" value="2" name="pc" size="1"/>
-</div>
-</div>
-</div>
-<div style="margin: 10px" id="filter"></div>
-<div>
-<input type="button" name="showTemplate" value="Output Template" /> 
-<input type="submit" value="Start" id="sbutton"/> 
-<input type="button" value="Clear" id="cbutton"/> 
-<input type="button" name="showSocks" value="Socks setting" />
-</div>
-<div id="loadingIMG"><img src="loading.gif" border="0" alt="Checking..." title="Checking..."/></div>
-<div id="result" style="margin-top:2px">
-</div>
-</div>
-</form>
-<div style="display:none">
-<div id="outputTemplate" title="Ouput template">
-	<textarea name="ot" id="ot" rows="2" cols="30"></textarea>
-</div>
-<div id="sockSetting" title="Sock Settings">
-	<textarea name="ls" id="ls" rows="10" cols="60"></textarea>
-</div>
-</div>
+	<form name="mform" action="<?php echo basename($_SERVER['PHP_SELF']) ?>" method="post" id="mform">
+		<input type="hidden" name="ot_value" id="ot_value" value="{input}" />
+		<input type="hidden" name="socks_value" id="socks_value" value="" />
+		<div style="text-align:center">
+			<div class="option">
+				<div class="row">
+					<div class="col-md-6 col-md-offset-3"><textarea rows="15" cols="75" name="ml" id="ml" class="form-control"></textarea></div>
+				</div>
+				<div class="row">
+					<div style="margin-top: 10px" class="col-md-12">
+						Seperator: <input type="text" value="|" name="sep" size="1"/>
+						| <input type="checkbox" name="adc" checked id="adc" /> <label for="adc">Auto Detect Column</label>
+						<div id="columnlist">
+						User column (start from 0): <input type="text" value="1" name="mc" size="1" />
+						| Pass column: <input type="text" value="2" name="pc" size="1"/>
+						</div>
+					</div>
+				</div>
+			</div>
+		<div style="margin: 10px" id="filter"></div>
+		<div>
+			<button type="button" class="btn btn-default" name="showTemplate">Output Template</button>
+			<button type="submit" class="btn btn-default" id="sbutton">Start</button>
+			<button type="button" class="btn btn-default" id="cbutton">Clear</button>
+			<button type="button" class="btn btn-default" name="showSocks">Socks setting</button>
+		</div>
+		<div id="loadingIMG"><img src="loading.gif" border="0" alt="Checking..." title="Checking..."/></div>
+			<div id="result" style="margin-top:2px">
+			</div>
+		</div>
+	</form>
+	
+	<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title"></h4>
+				</div>
+				<div class="modal-body">
+					<textarea class="modal-text form-control"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary button-save" data-dismiss="modal">Save changes</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="jquery-1.11.2.min.js"></script>
+	<script src="bootstrap.min.js"></script>
+	<script src="checkacc.js"></script>
+	<script src="outputtemplate.js"></script>
 </body>
 </html>

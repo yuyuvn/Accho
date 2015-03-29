@@ -20,11 +20,33 @@ function getCookie(cname) {
     return "";
 }
 $(function() {
-	$('input:button[name="showTemplate"]').click(function() {
-		$( "#outputTemplate" ).dialog("open");
+	$('button:button[name="showTemplate"]').click(function() {
+		//$( "#outputTemplate" ).dialog("open");
+		showModal("Output theme",$("#ot_value").val(), function(event) {
+			var v = event.data.body.val();
+			worker = new Worker("worker.js");
+			worker.addEventListener('message', function(e) {
+				var d = JSON.parse(e.data);
+				var mess = d.message;
+				var data = d.data;
+				if (mess === "prescan succeed") {
+					event.data.modal.modal('hide');
+					terminateWorker();
+					setCookie("ca_outputTemplate",data.input,365);
+					$("#ot_value").val(data.input);
+					requestData = data.requestData;
+				} else if (mess === "prescan failed") alert("Output template invalid: " + data);
+			}, false);
+			sendMessage("prescan",v);
+			return false;
+		});
 	});
-	$('input:button[name="showSocks"]').click(function() {
-		$( "#sockSetting" ).dialog("open");
+	$('button:button[name="showSocks"]').click(function() {
+		showModal("Socks list",$("#socks_value").val(), function(event) {
+			var v = event.data.body.val();
+			$("#socks_value").val(v);
+			return true;
+		});
 	});
 	$("#mform").submit(function( event ) {
 		if (checking) {
@@ -50,46 +72,13 @@ $(function() {
 	
 	$("#ot_value").val(getCookie("ca_outputTemplate"));
 	
-	$("#outputTemplate").dialog({
-		autoOpen: false,
-		width: 380,
-		dialogClass: "option",
-		buttons:{'Save':{
-			text: 'Save',
-			id: 'otSaveButton',
-			click: function() {
-				var v = $("#ot").val();
-				worker.addEventListener('message', function(e) {
-					var d = JSON.parse(e.data);
-					var mess = d.message;
-					var data = d.data;
-					if (mess === "prescan succeed") {
-						$("#outputTemplate").dialog("close");				
-						setCookie("ca_outputTemplate",data.input,365);
-						$("#ot_value").val(data.input);
-						worker.terminate();
-						worker = undefined;
-						requestData = data.requestData;
-					} else if (mess === "prescan failed") alert("Output template invalid: " + data);
-				}, false);
-				sendMessage("prescan",v);
-				return false;
-		}}},
-		open: function() {
-			worker = new Worker("worker.js");
-			$("#ot").val($("#ot_value").val());
-		}
-	});
-	$("#sockSetting").dialog({ autoOpen: false, width: 680,dialogClass: "option"});
-	
 	worker = new Worker("worker.js");
 	worker.addEventListener('message', function(e) {
 		var d = JSON.parse(e.data);
 		var mess = d.message;
 		var data = d.data;
 		if (mess === "prescan succeed") {
-			worker.terminate();
-			worker = undefined;
+			terminateWorker();
 			requestData = data.requestData;
 		} else if (mess === "prescan failed") alert("Output template invalid: " + data);
 	}, false);
@@ -117,11 +106,17 @@ function changeFavicon(src) {
     link.href = src;
     $('head').append(link);
 }
+function terminateWorker() {
+	if (worker) {
+		worker.terminate();
+		worker = undefined;
+	}
+}
 function StartChecking() {
 	if (checking) return;
 	if ($("input:text[name=sep]").val()=='') return;
 	
-	$("#sbutton").val("Stop");
+	$("#sbutton").html("Stop");
 	checking = true;
 	
 	jQuery(window).bind(
@@ -135,7 +130,7 @@ function StartChecking() {
 	changeFavicon('loading.ico');
 	
 	$(".option").find("input,textarea").attr("disabled", "disabled");
-	$("#otSaveButton").attr("disabled", "disabled");
+	$('#modal').find(".button-save").attr("disabled", "disabled");
 	mlist = $.trim($("#ml").val()).split("\n");
 	
 	auto_detect_column();
@@ -144,7 +139,7 @@ function StartChecking() {
 }
 function StopChecking() {
 	if (!checking) return;
-	$("#sbutton").val("Start");
+	$("#sbutton").html("Start");
 	checking = false;
 	try {
 		ajax.abort();
@@ -152,12 +147,12 @@ function StopChecking() {
 	catch (err) {}
 	changeFavicon('/favicon.ico');
 	document.title = 'Check acc';
-	worker.terminate();
+	if (worker) worker.terminate();
 	
 	jQuery(window).unbind("beforeunload");
 	
 	$(".option").find("input,textarea").removeAttr("disabled");
-	$("#otSaveButton").removeAttr("disabled");
+	$('#modal').find(".button-save").removeAttr("disabled");
 	$("#loadingIMG").css("visibility","hidden");
 }
 
@@ -254,4 +249,11 @@ function Processing(next) {
 }
 function sendMessage(m,d) {
 	worker.postMessage(JSON.stringify({message:m,data:d}));
+}
+function showModal(title,body,callback) {
+	$('#modal').find(".modal-title").html(title);
+	$('#modal').find(".modal-text").val(body);
+	$('#modal').modal('show');
+	if (callback) $('#modal').find(".button-save").on('click', {body: $('#modal').find(".modal-text"), modal: $('#modal')}, callback);
+	else $('#modal').find(".button-save").off('click');
 }
