@@ -10,7 +10,8 @@ define('DB_NAME',"checkmail");
 set_time_limit(600);
 header('Content-type: text/html; charset=utf-8');
 define("DIR",dirname(__FILE__));
-define("VERSION", "1.0.0")
+define("VERSION", "1.0.0");
+define("DEBUG", false);
 
 require_once('includes.php');
 
@@ -26,7 +27,8 @@ foreach (glob("plugins/*.php") as $filename)
 
 $mode = isset($_REQUEST['js']) ? "js" : (isset($_POST['data'])? "Process" : "GUI");
 if ($mode=="Process") {
-	error_reporting(0); //E_ALL
+	if (!DEBUG)	error_reporting(0);
+	else error_reporting(E_ALL);
 	$return = array();
 	try {
 		$data = json_decode($_POST['data'],true);
@@ -52,7 +54,8 @@ if ($mode=="Process") {
 	exit(json_encode($return));
 } else if ($mode == "js") {
 	if ($_REQUEST['js'] == "fields_declare") {
-		error_reporting(0); //E_ALL
+		if (!DEBUG)	error_reporting(0);
+		else error_reporting(E_ALL);
 		$p = array();
 		foreach ($checkers as $id => $checker) {
 			try {
@@ -71,7 +74,8 @@ if ($mode=="Process") {
 		if (count($p) > 0) echo 'interpreter.addParamsList({' . implode(',',$p) . '});';
 		exit();
 	} elseif ($_REQUEST['js'] == "functions_declare") {
-		error_reporting(0); //E_ALL
+		if (!DEBUG)	error_reporting(0);
+		else error_reporting(E_ALL);
 		$fs = array();
 		foreach ($checkers as $id => $checker) {
 			try {
@@ -132,10 +136,10 @@ if ($mode=="Process") {
 #columnlist {display:none;margin-top:5px}
 #result {max-height: 500px;overflow: auto}
 	</style>
-	<link rel="stylesheet" href="bootstrap.min.css" />
+	<link rel="stylesheet" href="css/bootstrap.min.css" />
 </head>
 <body>
-	<form name="mform" action="<?php echo basename($_SERVER['PHP_SELF']) ?>" method="post" id="mform">
+	<form name="mform" action="<?php echo htmlspecialchars("//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", ENT_QUOTES, 'UTF-8') ?>" method="post" id="mform">
 		<input type="hidden" name="ot_value" id="ot_value" value="{input}" />
 		<input type="hidden" name="socks_value" id="socks_value" value="" />
 		<div style="text-align:center">
@@ -161,7 +165,7 @@ if ($mode=="Process") {
 			<button type="button" class="btn btn-default" id="cbutton">Clear</button>
 			<button type="button" class="btn btn-default" name="showSocks">Socks setting</button>
 		</div>
-		<div id="loadingIMG"><img src="loading.gif" border="0" alt="Checking..." title="Checking..."/></div>
+		<div id="loadingIMG"><img src="ass/loading.gif" border="0" alt="Checking..." title="Checking..."/></div>
 			<div id="result" style="margin-top:2px">
 			</div>
 		</div>
@@ -185,9 +189,9 @@ if ($mode=="Process") {
 		</div>
 	</div>
 
-	<script src="jquery-1.11.2.min.js"></script>
-	<script src="bootstrap.min.js"></script>
-	<script src="checkacc.js"></script>
-	<script src="outputtemplate.js"></script>
+	<script src="js/jquery-1.11.2.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/checkacc.js"></script>
+	<script src="js/outputtemplate.js"></script>
 </body>
 </html>

@@ -23,17 +23,19 @@ class check_email extends plugins {
 	
 	public function init() {
 		parent::init();
-		if ($this->db && $this->db->query("SHOW TABLES LIKE 'record'")->rowCount() == 0) {
-			$this->db->query("CREATE TABLE `record` (
-				 `host` varchar(100) NOT NULL,
-				 `domain` varchar(100) NOT NULL DEFAULT '???',
-				 `port` int(11) unsigned NOT NULL DEFAULT '0',
-				 `socketType` tinyint(4) unsigned NOT NULL DEFAULT '0',
-				 `type` tinyint(4) unsigned NOT NULL DEFAULT '0',
-				 `pcondition` text,
-				 `usertype` tinyint(3) unsigned NOT NULL DEFAULT '0',
-				 PRIMARY KEY (`host`)
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+		if ($this->db) {
+			$result = $this->db->query("SHOW TABLES LIKE 'record'");
+			if ($result->num_rows == 0)
+				$this->db->query("CREATE TABLE `record` (
+					 `host` varchar(100) NOT NULL,
+					 `domain` varchar(100) NOT NULL DEFAULT '???',
+					 `port` int(11) unsigned NOT NULL DEFAULT '0',
+					 `socketType` tinyint(4) unsigned NOT NULL DEFAULT '0',
+					 `type` tinyint(4) unsigned NOT NULL DEFAULT '0',
+					 `pcondition` text,
+					 `usertype` tinyint(3) unsigned NOT NULL DEFAULT '0',
+					 PRIMARY KEY (`host`)
+					) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 		}
 	}
 	public function check($user,$pass,$request) {

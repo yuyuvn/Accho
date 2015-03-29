@@ -11,7 +11,7 @@ interpreter.setParamsList({
 	pass:"str",
 	input:"str",
 });
-importScripts('index.php?js=fields_declare');
+importScripts('../index.php?js=fields_declare');
 interpreter.addFunctions({
 	addClass: {
 		args: ["str"],
@@ -55,7 +55,7 @@ interpreter.addFunctions({
 		}
 	},
 });
-importScripts('index.php?js=functions_declare');
+importScripts('../index.php?js=functions_declare');
 interpreter.setDebug({
 	linespace: "<br>",
 	func: function(string) { sendMessage("debug",string); },

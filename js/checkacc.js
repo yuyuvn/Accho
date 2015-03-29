@@ -24,7 +24,7 @@ $(function() {
 		//$( "#outputTemplate" ).dialog("open");
 		showModal("Output theme",$("#ot_value").val(), function(event) {
 			var v = event.data.body.val();
-			worker = new Worker("worker.js");
+			worker = new Worker("js/worker.js");
 			worker.addEventListener('message', function(e) {
 				var d = JSON.parse(e.data);
 				var mess = d.message;
@@ -72,7 +72,7 @@ $(function() {
 	
 	$("#ot_value").val(getCookie("ca_outputTemplate"));
 	
-	worker = new Worker("worker.js");
+	worker = new Worker("js/worker.js");
 	worker.addEventListener('message', function(e) {
 		var d = JSON.parse(e.data);
 		var mess = d.message;
@@ -127,7 +127,7 @@ function StartChecking() {
 	);
 	
 	$("#loadingIMG").css("visibility","visible");
-	changeFavicon('loading.ico');
+	changeFavicon('ass/loading.ico');
 	
 	$(".option").find("input,textarea").attr("disabled", "disabled");
 	$('#modal').find(".button-save").attr("disabled", "disabled");
@@ -145,7 +145,7 @@ function StopChecking() {
 		ajax.abort();
 	}
 	catch (err) {}
-	changeFavicon('/favicon.ico');
+	changeFavicon('ass/favicon.ico');
 	document.title = 'Check acc';
 	if (worker) worker.terminate();
 	
@@ -221,7 +221,7 @@ function Processing(next) {
 	}
 	document.title = m[mc]+" - Check account";
 	
-	worker = new Worker("worker.js");
+	worker = new Worker("js/worker.js");
 	worker.addEventListener('message', function(e) {
 		var d = JSON.parse(e.data);
 		var mess = d.message;
