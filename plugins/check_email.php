@@ -22,8 +22,19 @@ class check_email extends plugins {
 	);
 	
 	public function init() {
-		// TODO: check if database aldready installed, if not then create table
 		parent::init();
+		if ($this->db && $this->db->query("SHOW TABLES LIKE 'record'")->rowCount() == 0) {
+			$this->db->query("CREATE TABLE `record` (
+				 `host` varchar(100) NOT NULL,
+				 `domain` varchar(100) NOT NULL DEFAULT '???',
+				 `port` int(11) unsigned NOT NULL DEFAULT '0',
+				 `socketType` tinyint(4) unsigned NOT NULL DEFAULT '0',
+				 `type` tinyint(4) unsigned NOT NULL DEFAULT '0',
+				 `pcondition` text,
+				 `usertype` tinyint(3) unsigned NOT NULL DEFAULT '0',
+				 PRIMARY KEY (`host`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+		}
 	}
 	public function check($user,$pass,$request) {
 		$return = array();
@@ -109,13 +120,12 @@ class check_email extends plugins {
 		return implode('.',array_slice($sd,$m-$min,$min));
 	}
 	private function getDatabase($domain) {
-		global $db;
-		if (isset($db)&&$db!=null&&$db!=false) {
-			$s = $db->getServer($domain);
+		if (isset($this->db)&&$this->db!=null&&$this->db!=false) {
+			$s = $this->getServer($domain);
 			if ($s!=false) {
 				if ($s->domain == "???") return -1;
 				elseif ($this->testServer($s->domain,$s->port,$s->type,$s->socketType)!=false) return $s;
-				else $db->getted = false;
+				else $this->db->getted = false;
 			}
 		}
 		return false;
@@ -226,7 +236,7 @@ class check_email extends plugins {
 			$s->usertype = 1;
 			$r = $this->try_login($e,$p,$s);
 			if ($r===true) {
-				$db->addServer($e->domain,$s);
+				$this->db->addServer($e->domain,$s);
 				return $r;
 			}
 			$s->usertype = 2;
