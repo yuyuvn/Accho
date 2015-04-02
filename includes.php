@@ -11,12 +11,15 @@ abstract class plugins {
 	);
 	
 	private $isInited = false;
+	private $ssid;
 	public $sock = "";
 	
 	abstract public function check($user,$pass,$request);
 	
 	public function init() {
 		if ($this->isInited) return;
+		
+		$this->ssid = md5(mt_rand(0,999999999));
 		
 		try {
 			if (isset($this->options['useDatabase']) && $this->options['useDatabase']) $this->db = new database(DB_SERVER,DB_USERNAME,DB_PASS,DB_NAME);
@@ -30,8 +33,8 @@ abstract class plugins {
 			curl_setopt($ch, CURLOPT_HEADER, 1);
 			curl_setopt($ch, CURLOPT_NOBODY, 0);
 			curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
-			curl_setopt($ch, CURLOPT_COOKIEJAR, DIR."/cookies.cookie");
-			curl_setopt($ch, CURLOPT_COOKIEFILE, DIR."/cookies.cookie");
+			curl_setopt($ch, CURLOPT_COOKIEJAR, DIR."/ass/{$this->ssid}.cookie");
+			curl_setopt($ch, CURLOPT_COOKIEFILE, DIR."/ass/{$this->ssid}.cookie");
 			curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -52,13 +55,12 @@ abstract class plugins {
 	}
 	
 	protected function startSession() {
-		$f=fopen(DIR.'/cookies.cookie','wb');
+		$f=fopen(DIR."/ass/{$this->ssid}.cookie",'wb');
 		fclose($f);
 	}
 	
 	protected function endSession() {
-		$f=fopen(DIR.'/cookies.cookie','wb');
-		fclose($f);
+		unlink(DIR."/ass/{$this->ssid}.cookie");
 	}
 }
 
