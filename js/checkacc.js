@@ -247,7 +247,7 @@ function Processing(next) {
 			$("body").append(data);
 		}
 	}, false);
-	sendMessage("scan",{data:{user:m[mc],pass:m[pc],input:value},requestData:requestData,input:$("#ot_value").val(),action:$("#mform").attr("action")});
+	sendMessage("scan",{data:{user:m[mc],pass:m[pc],input:value},requestData:requestData,input:$("#ot_value").val(),inputs:m,action:$("#mform").attr("action")});
 }
 function sendMessage(m,d) {
 	worker.postMessage(JSON.stringify({message:m,data:d}));

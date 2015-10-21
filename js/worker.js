@@ -10,6 +10,7 @@ interpreter.setParamsList({
 	user:"str",
 	pass:"str",
 	input:"str",
+	inputs: {}
 });
 importScripts('../index.php?js=fields_declare');
 interpreter.addFunctions({
@@ -71,6 +72,7 @@ interpreter.setDataFunc(function(o,key) {
 			config["user"] = o.data["user"];
 			config["pass"] = o.data["pass"];
 			config["input"] = o.data["input"];
+			config["inputs"] = o.data["inputs"];
 			config[key] = o.requestData[key];
 			
 			$.ajax.post({
@@ -109,13 +111,14 @@ self.addEventListener('message', function(e) {
 			sendMessage("prescan failed",e);
 		}
 	}
-	if (mess === "scan") { // data = {user:string,pass:string,input:array}
+	if (mess === "scan") { // data = {user:string,pass:string,input:string,inputs:array}
 		classes = new Object();
 		filter = undefined;
 		interpreter.reset();
 		interpreter.data = data.data;
 		interpreter.requestData = data.requestData;
-		interpreter.input = data.input;
+		interpreter.input = data.input;		
+		interpreter.inputs = data.inputs;
 		ajaxurl = data.action;
 		
 		classes = new Object();

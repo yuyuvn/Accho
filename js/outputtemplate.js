@@ -225,7 +225,7 @@ OutputTemplate.prototype.readToken = function() {
 				return this.newToken('int',parseInt(s));
 			} else {
 				try {
-					while (/[^0-9\{\}\(\)\@\=\~\>\<\r\n\?\:\,]/.test(this.readingChar)) {
+					while (/[^0-9\{\}\(\)\@\=\~\>\<\r\n\?\:\,\|\&]/.test(this.readingChar)) {
 						switch (this.readingChar) {
 							case "\\":
 								try {
@@ -369,7 +369,7 @@ OutputTemplate.prototype.readField = function() {
 	this.nextToken();
 	this.eat("}");
 	if (t.id == 'int') {
-		return this.newObject("str",premode ? "" : this.data.input[t.value]);
+		return this.newObject("str",premode ? "" : this.inputs[t.value]);
 	} else if (t.id == 'str') {
 		var tree = t.value.split(".");
 		var dt = premode ? this.requestData : this.data;
@@ -543,8 +543,9 @@ OutputTemplate.prototype.checkEqualType2 = function(l,r) {
 	}
 	throw "Wrong type";
 }
-OutputTemplate.prototype.checkInt = function(t) {
-	if (t == "int") return true;
+OutputTemplate.prototype.checkInt = function(o) {
+	if (o.type == "int") return true;
+	if (!isNaN(o.value)) return true;
 	throw "Wrong type";
 }
 OutputTemplate.prototype.checkBool = function(t) {
@@ -562,20 +563,20 @@ OutputTemplate.prototype.readCondition = function(lv,top,rv) {
 				this.checkEqualType(lv.type,rv.type);
 				return this.newObject("bool",lv.value != rv.value);
 			case ">":
-				this.checkInt(lv.type);
-				this.checkInt(rv.type);
+				this.checkInt(lv);
+				this.checkInt(rv);
 				return this.newObject("bool",lv.value > rv.value);
 			case "<":
-				this.checkInt(lv.type);
-				this.checkInt(rv.type);
+				this.checkInt(lv);
+				this.checkInt(rv);
 				return this.newObject("bool",lv.value < rv.value);
 			case ">=":
-				this.checkInt(lv.type);
-				this.checkInt(rv.type);
+				this.checkInt(lv);
+				this.checkInt(rv);
 				return this.newObject("bool",lv.value >= rv.value);
 			case "<=":
-				this.checkInt(lv.type);
-				this.checkInt(rv.type);
+				this.checkInt(lv);
+				this.checkInt(rv);
 				return this.newObject("bool",lv.value <= rv.value);
 			case "&":
 				this.checkBool(lv.type);
