@@ -58,7 +58,7 @@ $(function() {
 		}
 		return false;
 	});
-	
+
 	$("#adc").change(function() {
 		if (this.checked) {
 			$("#columnlist").css("display","none");
@@ -66,14 +66,14 @@ $(function() {
 			$("#columnlist").css("display","block");
 		}
 	});
-	
-	
+
+
 	$("#cbutton").click(function() {
 		clear();
 	});
-	
+
 	$("#ot_value").val(getCookie("ca_outputTemplate"));
-	
+
 	worker = new Worker("js/worker.js");
 	worker.addEventListener('message', function(e) {
 		var d = JSON.parse(e.data);
@@ -85,7 +85,7 @@ $(function() {
 		} else if (mess === "prescan failed") alert("Output template invalid: " + data);
 	}, false);
 	sendMessage("prescan",$("#ot_value").val());
-		
+
 	$(document).on("change", "#filter input:checkbox", function(eventObject) {
 		if ($(this).is(':checked')) {
 			$("[filter="+$(this).attr("ref")+"]").css("display","");
@@ -93,10 +93,10 @@ $(function() {
 			$("[filter="+$(this).attr("ref")+"]").css("display","none");
 		}
 	});
-	
+
 	clear();
 });
-function clear() {	
+function clear() {
 	$("#result").html("");
 	$("#filter").html('Filter: <input type="checkbox" ref="error" id="filter_error" checked /> <label for="filter_error">Error</label>');
 }
@@ -117,26 +117,26 @@ function terminateWorker() {
 function StartChecking() {
 	if (checking) return;
 	if ($("input:text[name=sep]").val()=='') return;
-	
+
 	$("#sbutton").html("Stop");
 	checking = true;
-	
+
 	jQuery(window).bind(
-		"beforeunload", 
-		function() { 
+		"beforeunload",
+		function() {
 			return true;
 		}
 	);
-	
+
 	$("#loadingIMG").css("visibility","visible");
 	changeFavicon('ass/loading.ico');
-	
+
 	$(".option").find("input,textarea").attr("disabled", "disabled");
 	$('#modal').find(".button-save").attr("disabled", "disabled");
 	mlist = $.trim($("#ml").val()).split("\n");
-	
+
 	auto_detect_column();
-	
+
 	Processing(true);
 }
 function StopChecking() {
@@ -150,9 +150,9 @@ function StopChecking() {
 	changeFavicon('ass/favicon.ico');
 	document.title = title;
 	if (worker) worker.terminate();
-	
+
 	jQuery(window).unbind("beforeunload");
-	
+
 	$(".option").find("input,textarea").removeAttr("disabled");
 	$('#modal').find(".button-save").removeAttr("disabled");
 	$("#loadingIMG").css("visibility","hidden");
@@ -222,13 +222,13 @@ function Processing(next) {
 		return;
 	}
 	document.title = m[mc]+" - "+title;
-	
+
 	worker = new Worker("js/worker.js");
 	worker.addEventListener('message', function(e) {
 		var d = JSON.parse(e.data);
 		var mess = d.message;
 		var data = d.data;
-		
+
 		if (mess === "result") {
 			$("#result").append("<div title=\""+data.title+"\" "+(data.filter?("filter=\""+data.filter+"\" "+($('#filter_'+data.filter).is(":checked")?"":"style=\"display:none\" ")):"")+data.classes+">"+data.output+"</div>");
 			mlist = mlist.slice(1);
@@ -245,6 +245,8 @@ function Processing(next) {
 			StopChecking();
 		} else if (mess === "debug") {
 			$("body").append(data);
+		} else if (mess === "stop") {
+			StopChecking();
 		}
 	}, false);
 	sendMessage("scan",{data:{user:m[mc],pass:m[pc],input:value},requestData:requestData,input:$("#ot_value").val(),inputs:m,action:$("#mform").attr("action")});

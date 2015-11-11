@@ -55,6 +55,14 @@ interpreter.addFunctions({
 			classes = new Object();
 		}
 	},
+	stop: {
+		args: [],
+		opargs: [],
+		type: "void",
+		code: function(arg) {
+			sendMessage("stop");
+		}
+	}
 });
 importScripts('../index.php?js=functions_declare');
 interpreter.setDebug({
@@ -74,7 +82,7 @@ interpreter.setDataFunc(function(o,key) {
 			config["input"] = o.data["input"];
 			config["inputs"] = o.data["inputs"];
 			config[key] = o.requestData[key];
-			
+
 			$.ajax.post({
 				url: ajaxurl,
 				data: {data: JSON.stringify(config)},
@@ -102,7 +110,7 @@ self.addEventListener('message', function(e) {
 	var d = JSON.parse(e.data);
 	var mess = d.message;
 	var data = d.data;
-	
+
 	if (mess === "prescan") { // data = string
 		try {
 			readOutputTemplate(data);
@@ -117,16 +125,16 @@ self.addEventListener('message', function(e) {
 		interpreter.reset();
 		interpreter.data = data.data;
 		interpreter.requestData = data.requestData;
-		interpreter.input = data.input;		
+		interpreter.input = data.input;
 		interpreter.inputs = data.inputs;
 		ajaxurl = data.action;
-		
+
 		classes = new Object();
 		filter = undefined;
-		
+
 		try {
 			var s = escapeHtml(interpreter.scan());
-			
+
 			var r = interpreter.data;
 			var cl = [];
 			for (var cn in classes) cl.push(cn);
@@ -135,7 +143,7 @@ self.addEventListener('message', function(e) {
 			if (interpreter.errors.length > 0) {
 				title = escapeHtml(interpreter.errors.join("\n"));
 				filter = "error";
-				c = "class=\"error\" ";				
+				c = "class=\"error\" ";
 			}
 			sendMessage("result",{title:title,filter:filter,classes:c,output:s});
 		} catch (e) {
@@ -144,7 +152,7 @@ self.addEventListener('message', function(e) {
 	}
 }, false);
 
-function readOutputTemplate(v) {	
+function readOutputTemplate(v) {
 	interpreter.setInput(v);
 	interpreter.prescan();
 }
