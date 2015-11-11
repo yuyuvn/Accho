@@ -12,7 +12,9 @@ abstract class plugins {
 
 	private $isInited = false;
 	private $ssid;
+	private $ssStarted = false;
 	public $sock = "";
+
 
 	abstract public function check($user,$pass,$request);
 
@@ -48,6 +50,11 @@ abstract class plugins {
 		if (is_array($data)) {
 			curl_setopt($ch, CURLOPT_POST, TRUE);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		}
+		if (is_array($config["curl"])) {
+			foreach($config["curl"] as $k => $c) {
+				curl_setopt($ch, $k, $c);
+			}
 		}
 		$d = curl_exec($ch);
 		curl_close($ch);
@@ -97,10 +104,16 @@ abstract class plugins {
 	protected function startSession() {
 		$f=fopen(DIR."/ass/{$this->ssid}.cookie",'wb');
 		fclose($f);
+		$this->ssStarted = true;
 	}
 
 	protected function endSession() {
 		unlink(DIR."/ass/{$this->ssid}.cookie");
+		$this->ssStarted = false;
+	}
+
+	function __destruct() {
+		if($this->ssStarted) $this->endSession();
 	}
 }
 

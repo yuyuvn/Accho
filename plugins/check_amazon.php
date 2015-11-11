@@ -52,10 +52,6 @@ class check_amazon extends plugins {
 			}
 		}
 
-
-		// delete cookie
-		$this->endSession();
-
 		$return['status'] = "LIVE";
 		return $return;
 	}
