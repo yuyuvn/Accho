@@ -1,9 +1,9 @@
 <?php
 // database config
-define('DB_SERVER',"localhost");
-define('DB_USERNAME',"root");
-define('DB_PASS',"");
-define('DB_NAME',"checkmail");
+define('DB_SERVER',getenv('DATABASE_HOST') || "localhost");
+define('DB_USERNAME',getenv('DATABASE_USERNAME') || "root");
+define('DB_PASS',getenv('DATABASE_PASSWORD') || "");
+define('DB_NAME',getenv('DATABASE_TABLE') || "checkmail");
 
 
 // DO NOT EDIT BELOW IF YOU DON't KNOW WHAT ARE YOU DOING
@@ -36,15 +36,15 @@ if ($mode=="Process") {
 		$p = $data['pass'];
 		$return = array("user"=>$m,"pass"=>$p);
 		if (!checkdata($m,$p)) throw new Exception("Input not valid");
-		
+
 		foreach ($checkers as $id => $checker) {
 			if (isset($data[$id])) {
 				$checker->init();
-				
+
 				if (isset($_REQUEST['sock'])) {
 					$checker->sock = $_REQUEST['sock'];
 				}
-				
+
 				$return[$id] = $checker->check($m,$p,$data[$id]);
 			}
 		}
@@ -62,14 +62,14 @@ if ($mode=="Process") {
 				if (isset($checker->fields)) {
 					if (is_array($checker->fields) && count($checker->fields) == 0) continue;
 					if ($checker->fields == '') continue;
-					
+
 					$p[] = $id . ":" . json_encode($checker->fields);
 				}
 			} catch (Exception $e) {
 				echo "/*\nERROR:\n".$e."\n*/";
 			}
 		}
-		
+
 		echo "//Add fields\n";
 		if (count($p) > 0) echo 'interpreter.addParamsList({' . implode(',',$p) . '});';
 		exit();
@@ -83,23 +83,23 @@ if ($mode=="Process") {
 					if (!is_array($checker->cus_functs)) continue;
 					foreach ($checker->cus_functs as $fname => $cf) {
 						$f = array();
-						
+
 						$f['name'] = $fname;
-						
+
 						// list arguments
 						$args = array();
 						foreach ($cf['args'] as $a) $args[] = "\"$a\"";
 						$f['args'] = "[" . implode(',',$args) . "]";
-						
+
 						// list optional arguments
 						$args = array();
 						foreach ($cf['opargs'] as $a) $args[] = "\"$a\"";
 						$f['opargs'] = "[" . implode(',',$args) . "]";
-						
+
 						$f['type'] = '"' . $cf['type'] . '"';
-						
+
 						$f['code'] = 'function(arg) {' . $cf['code'] . '}';
-						
+
 						$fs[] = "{$f['name']}: {args: {$f['args']},opargs: {$f['opargs']},type: {$f['type']},code: {$f['code']}}";
 					}
 				}
@@ -170,7 +170,7 @@ if ($mode=="Process") {
 			</div>
 		</div>
 	</form>
-	
+
 	<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
