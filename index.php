@@ -10,16 +10,17 @@ define('DB_NAME',getenv('DATABASE_TABLE') || "checkmail");
 set_time_limit(600);
 header('Content-type: text/html; charset=utf-8');
 define("DIR",dirname(__FILE__));
-define("VERSION", "1.0.0");
+define("VERSION", "1.1.0");
 define("DEBUG", false);
 
 require_once('includes.php');
 
 // get list plugins
 $checkers = array();
-foreach (glob("plugins/*.php") as $filename)
+$template = array("header"=>"","footer"=>"","buttons"=>"");
+foreach (glob("plugins/check_*.php") as $filename)
 {
-    require_once ($filename);
+	require_once ($filename);
 	$class = basename($filename,'.php');
 	eval('$o = new ' . $class . '();');
 	$checkers[$o->id] = $o;
@@ -111,7 +112,12 @@ if ($mode=="Process") {
 		if (count($fs) > 0) echo 'interpreter.addFunctions({' . implode(',',$fs) . '});';
 		exit();
 	}
+} else {
+	foreach ($checkers as $c) {
+		if (method_exists($c, "cus_template")) $c->cus_template($template);
+	}
 }
+
 ?>
 <!DOCTYPE html><html>
 <head>
@@ -137,6 +143,7 @@ if ($mode=="Process") {
 #result {max-height: 500px;overflow: auto}
 	</style>
 	<link rel="stylesheet" href="css/bootstrap.min.css" />
+	<?php=$template["header"]?>
 </head>
 <body>
 	<form name="mform" action="<?php echo htmlspecialchars("//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", ENT_QUOTES, 'UTF-8') ?>" method="post" id="mform">
@@ -165,6 +172,7 @@ if ($mode=="Process") {
 			<button type="button" class="btn btn-default" id="cbutton">Clear</button>
 			<button type="button" class="btn btn-default" name="showSocks">Socks setting</button>
 		</div>
+		<?php=$template["buttons"]?>
 		<div id="loadingIMG"><img src="ass/loading.gif" border="0" alt="Checking..." title="Checking..."/></div>
 			<div id="result" style="margin-top:2px">
 			</div>
@@ -193,5 +201,6 @@ if ($mode=="Process") {
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/checkacc.js"></script>
 	<script src="js/outputtemplate.js"></script>
+	<?php=$template["footer"]?>
 </body>
 </html>
