@@ -1,14 +1,16 @@
 <?php
 class check_email extends plugins {
-	public $id = "email";
-	public $name = "Check email";
-	public $version = "1.0.0";
-	public $descrition = "Check email, autu guess mail server";
-	
+	public $meta = array(
+		'id' 	=> "email",
+		'name' => "Check email",
+		'version' => "1.0.0",
+		'descrition' =>"Check email, autu guess mail server"
+	);
+
 	protected $options = array(
 		'useDatabase' => true,
 	);
-	
+
 	public $fields = array(
 		"status" => "str",
 		"server" => array(
@@ -20,22 +22,20 @@ class check_email extends plugins {
 			"usertype" => "str",
 		),
 	);
-	
+
 	public function init() {
 		parent::init();
 		if ($this->db) {
-			$result = $this->db->query("SHOW TABLES LIKE 'record'");
-			if ($result->num_rows == 0)
-				$this->db->query("CREATE TABLE `record` (
-					 `host` varchar(100) NOT NULL,
-					 `domain` varchar(100) NOT NULL DEFAULT '???',
-					 `port` int(11) unsigned NOT NULL DEFAULT '0',
-					 `socketType` tinyint(4) unsigned NOT NULL DEFAULT '0',
-					 `type` tinyint(4) unsigned NOT NULL DEFAULT '0',
-					 `pcondition` text,
-					 `usertype` tinyint(3) unsigned NOT NULL DEFAULT '0',
-					 PRIMARY KEY (`host`)
-					) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+			$this->db->query("CREATE TABLE IF NOT EXISTS `record` (
+			 `host` varchar(100) NOT NULL,
+			 `domain` varchar(100) NOT NULL DEFAULT '???',
+			 `port` int(11) NOT NULL DEFAULT '0',
+			 `socketType` tinyint(4) NOT NULL DEFAULT '0',
+			 `type` tinyint(4) NOT NULL DEFAULT '0',
+			 `pcondition` text,
+			 `usertype` tinyint(3) NOT NULL DEFAULT '0',
+			 PRIMARY KEY (`host`)
+			)");
 		}
 	}
 	public function check($user,$pass,$request) {
@@ -50,7 +50,7 @@ class check_email extends plugins {
 			$return["status"] = "WHERE";
 			return $return;
 		}
-		
+
 		if (isset($request["server"])) {
 			$return["server"] = array(
 				"domain" => $server->domain,
@@ -61,13 +61,13 @@ class check_email extends plugins {
 				"pcondition" => $server->pcondition
 			);
 		}
-		
+
 		$r = $this->try_login($mail,$pass,$server);
 		if ($r===true) $return["status"] = "LIVE";
 		else $return["status"] = "DIE";
 		return $return;
 	}
-	
+
 	private function getEmailAddress($input) {
 		$email = explode('@',$input);
 		$domain = end($email);
@@ -79,13 +79,13 @@ class check_email extends plugins {
 		$e->user = $user;
 		return $e;
 	}
-	
-	private function searchServer($domain) {	
+
+	private function searchServer($domain) {
 		// Get from database
 		$s = $this->getDatabase($domain);
 		if ($s===-1) return false;
 		elseif ($s!=false) return $s;
-		
+
 		// Test Thunderbird server
 		$s = $this->getThunderBirdServer($domain);
 		if ($s!=false) return $s;
@@ -95,14 +95,14 @@ class check_email extends plugins {
 				if ($s!=false) return $s;
 			}
 		}
-		
+
 		// Guess Common server
 		$s = $this->guessServer($domain);
-		if ($s!=false) return $s;	
-		
+		if ($s!=false) return $s;
+
 		return false;
 	}
-	
+
 	private function guessServer($domain) {
 		$ld = $this->listdomain($domain);
 		foreach ($ld as $d) {
@@ -137,7 +137,7 @@ class check_email extends plugins {
 		if ($result!='') {
 			// have record
 			$xml = simplexml_load_string($result);
-			
+
 			if ($xml) {
 				if (count($xml->emailProvider->incomingServer)>1) {
 					$server = $xml->emailProvider->incomingServer[0];
@@ -186,7 +186,7 @@ class check_email extends plugins {
 			} else {
 				if ($s = $this->testServer($domain,$port,1,$type)) return $s;
 				if ($s = $this->testServer($domain,$port,2,$type)) return $s;
-			}		
+			}
 		} else {
 			if (!$this->check_domain($domain,143,1,1)) return false;
 			if ($s = $this->testServer($domain,143,1)) return $s;
@@ -228,7 +228,7 @@ class check_email extends plugins {
 			$r[] = implode('.',array_slice($sd,$i,$m-$i));
 		return $r;
 	}
-	private function try_login($e,$p,$s) {		
+	private function try_login($e,$p,$s) {
 		if(!$this->checkPassCondition($p,$s->pcondition)) return false;
 		if ($s->usertype > 0 && $s->usertype < 3) {
 			if ($s->usertype==1) $u = $e->user;
@@ -248,7 +248,7 @@ class check_email extends plugins {
 				return $r;
 			}
 		}
-		
+
 		return false;
 	}
 	private function login($u,$p,$s,$r=0) {
@@ -262,7 +262,7 @@ class check_email extends plugins {
 			if ($i!=false) $r = true;
 			else {
 				if ($r<2&&preg_match('/connection broken/i',imap_last_error())) {
-					$r++;				
+					$r++;
 					imap_errors();
 					imap_alerts();
 					return login($u,$p,$s,$r);
@@ -282,15 +282,16 @@ class check_email extends plugins {
 		if ($condition) eval($condition);
 		return $valid;
 	}
-	
+
 	// database
 	var $getted = false;
 	private function getServer($domain) {
 		try {
-			$result = $this->db->query("SELECT `domain`,`port`,`socketType`,`type`,`pcondition`,`usertype` FROM `record` WHERE host = '" . $this->db->real_escape_string($domain) . "' LIMIT 1");
-			if ($result->num_rows < 1) return false;
+			$sth = $this->db->prepare("SELECT `domain`,`port`,`socketType`,`type`,`pcondition`,`usertype` FROM `record` WHERE host = ? LIMIT 1");
+			$sth->execute(array($domain));
+			if ($sth->rowCount() < 1) return false;
 			$this->getted = true;
-			return $result->fetch_object("Server");
+			return $sth->fetchAll(PDO::FETCH_CLASS,"Server");
 		} catch (Exception $e) {
 			return false;
 		}
@@ -298,16 +299,11 @@ class check_email extends plugins {
 	private function addServer($host,$s) {
 		try {
 			if (!is_a($s,"Server")) return;
-			$this->db->real_query("INSERT INTO `record` (`host`,`domain`,`port`,`socketType`,`type`,`pcondition`,`usertype`) VALUES (".
-				"'". $this->db->real_escape_string($host) . "'" .
-				",'". $this->db->real_escape_string($s->domain) . "'" .
-				',' . (int)$s->port .
-				',' .(int)$s->socketType .
-				',' . (int)$s->type .
-				",'". $this->db->real_escape_string($s->pcondition) . "'" .
-				',' . (int)$s->usertype .
-				") ON DUPLICATE KEY UPDATE domain=VALUES(domain), port=VALUES(port), socketType=VALUES(socketType), type=VALUES(type), usertype=VALUES(usertype)"
-			);
+			$sth = $this->db->prepare("DELETE FROM `record` WHERE host = ?");
+			$sth->execute(array($host));
+			$sth = $this->db->prepare("INSERT INTO `record` (`host`,`domain`,`port`,`socketType`,`type`,`pcondition`,`usertype`) VALUES (
+				:host, :domain, :port, :socket, :type, :pcondition, :usertype)");
+			$sth->execute(array($host, $s->domain, (int)$s->port, (int)$s->socketType, (int)$s->type, $s->pcondition, (int)$s->usertype));
 		} catch (Exception $e) {}
 	}
 	private function addUnknowServer($host) {
@@ -331,7 +327,7 @@ class check_email extends plugins {
 			POP3 = 2,
 			LOCALPART = 1,
 			FULL_EMAIL_ADDRESS = 2;
-		
+
 		var $domain = "???";
 		var $port = 0;
 		var $socketType = Server::UNKNOW; // 1~>no encry, 2~>ssl, 3~>tls

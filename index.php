@@ -1,17 +1,12 @@
 <?php
-// database config
-define('DB_SERVER',getenv('DATABASE_HOST') || "localhost");
-define('DB_USERNAME',getenv('DATABASE_USERNAME') || "root");
-define('DB_PASS',getenv('DATABASE_PASSWORD') || "");
-define('DB_NAME',getenv('DATABASE_TABLE') || "checkmail");
 
 
-// DO NOT EDIT BELOW IF YOU DON't KNOW WHAT ARE YOU DOING
 set_time_limit(600);
 header('Content-type: text/html; charset=utf-8');
 define("DIR",dirname(__FILE__));
-define("VERSION", "1.0.0");
-define("DEBUG", false);
+define("VERSION", "1.1.0");
+define("DEBUG", getenv('DEBUG'));
+define('DATABASE',getenv('DATABASE') ? getenv('DATABASE') : "sqlite:db.sqlite");
 
 require_once('includes.php');
 
@@ -22,7 +17,7 @@ foreach (glob("plugins/*.php") as $filename)
     require_once ($filename);
 	$class = basename($filename,'.php');
 	eval('$o = new ' . $class . '();');
-	$checkers[$o->id] = $o;
+	$checkers[$o->meta["id"]] = $o;
 }
 
 $mode = isset($_REQUEST['js']) ? "js" : (isset($_POST['data'])? "Process" : "GUI");

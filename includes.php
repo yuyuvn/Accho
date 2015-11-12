@@ -1,5 +1,4 @@
 <?php
-class database extends mysqli {};
 abstract class plugins {
 	protected $db;
 	public $id = "default";
@@ -11,9 +10,6 @@ abstract class plugins {
 	);
 
 	private $isInited = false;
-	private $ssid;
-	private $ssStarted = false;
-	public $sock = "";
 
 
 	abstract public function check($user,$pass,$request);
@@ -21,20 +17,47 @@ abstract class plugins {
 	public function init() {
 		if ($this->isInited) return;
 
-		$this->ssid = md5(mt_rand(0,999999999));
-
 		try {
-			if (isset($this->options['useDatabase']) && $this->options['useDatabase']) $this->db = new database(DB_SERVER,DB_USERNAME,DB_PASS,DB_NAME);
+			if (isset($this->options['useDatabase']) && $this->options['useDatabase']) {
+				$this->db = new PDO(DATABASE);
+				$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			}
 		} catch (Exception $e) {}
 
 		$this->isInited = true;
 	}
+}
 
-	protected function connect($url,$ref = "",$data = null, $config = array()) {
+function checkdata($m,$p) {
+	if ($m==''||$p=='') return false;
+	return true;
+}
+function check_condition($m,$p) {
+	if(strlen($p)<8) return false;
+	if(!preg_match('/[A-Z]/',$p)) return false;
+	if(!preg_match('/[0-9]/',$p)) return false;
+	if($m==$p) return false;
+	if(!preg_match('/[a-z]/',$p)) return false;
+	for ($i=0;$i<strlen($p)-2;$i++) {
+		if ($p{$i} == $p{$i+1} && $p{$i+1} == $p{$i+2}) return false;
+	}
+	return true;
+}
+
+class Session {
+	private $ssid;
+	public $sock = "";
+
+	function __construct() {
+		$this->ssid = md5(mt_rand(0,999999999));
+		$f=fopen(DIR."/ass/{$this->ssid}.cookie",'wb');
+		fclose($f);
+	}
+
+	public function connect($url,$ref = "",$data = null, $config = array()) {
 		$ch = curl_init($url);
-			if (!$config["no_header"]) curl_setopt($ch, CURLOPT_HEADER, 1);
-			if ($config["header_only"]) curl_setopt($ch, CURLOPT_NOBODY, 1);
-			else curl_setopt($ch, CURLOPT_NOBODY, 0);
+			curl_setopt($ch, CURLOPT_HEADER, 1);
+			curl_setopt($ch, CURLOPT_NOBODY, 0);
 			curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
 			curl_setopt($ch, CURLOPT_COOKIEJAR, DIR."/ass/{$this->ssid}.cookie");
 			curl_setopt($ch, CURLOPT_COOKIEFILE, DIR."/ass/{$this->ssid}.cookie");
@@ -51,8 +74,8 @@ abstract class plugins {
 			curl_setopt($ch, CURLOPT_POST, TRUE);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		}
-		if (is_array($config["curl"])) {
-			foreach($config["curl"] as $k => $c) {
+		if (is_array($config)) {
+			foreach($config as $k => $c) {
 				curl_setopt($ch, $k, $c);
 			}
 		}
@@ -62,7 +85,7 @@ abstract class plugins {
 		return $d;
 	}
 
-	protected function get_field($data,$form_name,$field="*") {
+	public function get_field($data,$form_name,$field="*") {
 		$of = false;
 		if (is_array($field)) {
 			$of = true;
@@ -100,36 +123,9 @@ abstract class plugins {
 		return $rdata;
 	}
 
-
-	protected function startSession() {
-		$f=fopen(DIR."/ass/{$this->ssid}.cookie",'wb');
-		fclose($f);
-		$this->ssStarted = true;
-	}
-
-	protected function endSession() {
-		unlink(DIR."/ass/{$this->ssid}.cookie");
-		$this->ssStarted = false;
-	}
-
 	function __destruct() {
-		if($this->ssStarted) $this->endSession();
+		unlink(DIR."/ass/{$this->ssid}.cookie");
 	}
 }
 
-function checkdata($m,$p) {
-	if ($m==''||$p=='') return false;
-	return true;
-}
-function check_condition($m,$p) {
-	if(strlen($p)<8) return false;
-	if(!preg_match('/[A-Z]/',$p)) return false;
-	if(!preg_match('/[0-9]/',$p)) return false;
-	if($m==$p) return false;
-	if(!preg_match('/[a-z]/',$p)) return false;
-	for ($i=0;$i<strlen($p)-2;$i++) {
-		if ($p{$i} == $p{$i+1} && $p{$i+1} == $p{$i+2}) return false;
-	}
-	return true;
-}
 ?>
