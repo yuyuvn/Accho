@@ -32,8 +32,12 @@ class check_playasia extends plugins {
 
 		$html = $this->connect($url,$url,null,array("curl"=>$cookie));
 
+		if (strpos($html, "recaptcha_widget_div") !== false) {
+			$return['status'] = "CAPTCHA";
+			return $return;
+		}
+
 		$data = $this->get_field($html,"login");
-		#var_dump($data);
 
 		$data["email_address"] = $m;
 		$data["password"] = $p;
