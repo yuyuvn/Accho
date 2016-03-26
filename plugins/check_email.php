@@ -27,8 +27,6 @@ class check_email extends plugins {
 		parent::init();
 		if ($this->db) {
 			try {
-				$result = $this->db->query("SELECT 1 FROM record LIMIT 1");
-			} catch (Exception $e) {
 				$this->db->query("CREATE TABLE record (
 					host varchar(100) NOT NULL,
 					domain varchar(100) NOT NULL DEFAULT '???',
@@ -39,6 +37,8 @@ class check_email extends plugins {
 					usertype tinyint NOT NULL DEFAULT '0',
 					PRIMARY KEY (host)
 				)");
+			} catch (Exception $e) {
+				
 			}
 		}
 	}
