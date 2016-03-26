@@ -7,6 +7,9 @@ define("DIR",dirname(__FILE__));
 define("VERSION", "1.1.0");
 define("DEBUG", getenv('DEBUG'));
 define('DATABASE',getenv('DATABASE') ? getenv('DATABASE') : "sqlite:db.sqlite");
+define('DATABASE_USERNAME',getenv('DATABASE_USERNAME') ? getenv('DATABASE_USERNAME') : "root");
+define('DATABASE_PASSWORD',getenv('DATABASE_PASSWORD') ? getenv('DATABASE_PASSWORD') : null);
+define('DATABASE_OPTIONS',getenv('DATABASE_OPTIONS') ? getenv('DATABASE_OPTIONS') : null);
 
 require_once('includes.php');
 

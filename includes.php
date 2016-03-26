@@ -19,7 +19,7 @@ abstract class plugins {
 
 		try {
 			if (isset($this->options['useDatabase']) && $this->options['useDatabase']) {
-				$this->db = new PDO(DATABASE);
+				$this->db = new PDO(DATABASE, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_OPTIONS);
 				$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			}
 		} catch (Exception $e) {}
