@@ -29,7 +29,7 @@ class check_email extends plugins {
 			try {
 				$result = $this->db->query("SELECT 1 FROM `record` LIMIT 1");
 			} catch (Exception $e) {
-				$this->db->query("CREATE TABLE IF NOT EXISTS `record` (
+				$this->db->query("CREATE TABLE `record` (
 					`host` varchar(100) NOT NULL,
 					`domain` varchar(100) NOT NULL DEFAULT '???',
 					`port` int(11) NOT NULL DEFAULT '0',
