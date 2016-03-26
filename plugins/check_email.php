@@ -26,16 +26,20 @@ class check_email extends plugins {
 	public function init() {
 		parent::init();
 		if ($this->db) {
-			$this->db->query("CREATE TABLE IF NOT EXISTS `record` (
-			 `host` varchar(100) NOT NULL,
-			 `domain` varchar(100) NOT NULL DEFAULT '???',
-			 `port` int(11) NOT NULL DEFAULT '0',
-			 `socketType` tinyint(4) NOT NULL DEFAULT '0',
-			 `type` tinyint(4) NOT NULL DEFAULT '0',
-			 `pcondition` text,
-			 `usertype` tinyint(3) NOT NULL DEFAULT '0',
-			 PRIMARY KEY (`host`)
-			)");
+			try {
+				$result = $pdo->query("SELECT 1 FROM `record` LIMIT 1");
+			} catch (Exception $e) {
+				$this->db->query("CREATE TABLE IF NOT EXISTS `record` (
+					`host` varchar(100) NOT NULL,
+					`domain` varchar(100) NOT NULL DEFAULT '???',
+					`port` int(11) NOT NULL DEFAULT '0',
+					`socketType` tinyint(4) NOT NULL DEFAULT '0',
+					`type` tinyint(4) NOT NULL DEFAULT '0',
+					`pcondition` text,
+					`usertype` tinyint(3) NOT NULL DEFAULT '0',
+					PRIMARY KEY (`host`)
+				)");
+			}
 		}
 	}
 	public function check($user,$pass,$request) {
