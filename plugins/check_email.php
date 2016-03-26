@@ -27,17 +27,17 @@ class check_email extends plugins {
 		parent::init();
 		if ($this->db) {
 			try {
-				$result = $this->db->query("SELECT 1 FROM `record` LIMIT 1");
+				$result = $this->db->query("SELECT 1 FROM record LIMIT 1");
 			} catch (Exception $e) {
-				$this->db->query("CREATE TABLE `record` (
-					`host` varchar(100) NOT NULL,
-					`domain` varchar(100) NOT NULL DEFAULT '???',
-					`port` int(11) NOT NULL DEFAULT '0',
-					`socketType` tinyint(4) NOT NULL DEFAULT '0',
-					`type` tinyint(4) NOT NULL DEFAULT '0',
-					`pcondition` text,
-					`usertype` tinyint(3) NOT NULL DEFAULT '0',
-					PRIMARY KEY (`host`)
+				$this->db->query("CREATE TABLE record (
+					host varchar(100) NOT NULL,
+					domain varchar(100) NOT NULL DEFAULT '???',
+					port int(11) NOT NULL DEFAULT '0',
+					socketType tinyint(4) NOT NULL DEFAULT '0',
+					type tinyint(4) NOT NULL DEFAULT '0',
+					pcondition text,
+					usertype tinyint(3) NOT NULL DEFAULT '0',
+					PRIMARY KEY (host)
 				)");
 			}
 		}
@@ -291,7 +291,7 @@ class check_email extends plugins {
 	var $getted = false;
 	private function getServer($domain) {
 		try {
-			$sth = $this->db->prepare("SELECT `domain`,`port`,`socketType`,`type`,`pcondition`,`usertype` FROM `record` WHERE host = ? LIMIT 1");
+			$sth = $this->db->prepare("SELECT domain,port,socketType,type,pcondition,usertype FROM record WHERE host = ? LIMIT 1");
 			$sth->execute(array($domain));
 			if ($sth->rowCount() < 1) return false;
 			$this->getted = true;
@@ -303,9 +303,9 @@ class check_email extends plugins {
 	private function addServer($host,$s) {
 		try {
 			if (!is_a($s,"Server")) return;
-			$sth = $this->db->prepare("DELETE FROM `record` WHERE host = ?");
+			$sth = $this->db->prepare("DELETE FROM record WHERE host = ?");
 			$sth->execute(array($host));
-			$sth = $this->db->prepare("INSERT INTO `record` (`host`,`domain`,`port`,`socketType`,`type`,`pcondition`,`usertype`) VALUES (
+			$sth = $this->db->prepare("INSERT INTO record (host,domain,port,socketType,type,pcondition,usertype) VALUES (
 				:host, :domain, :port, :socket, :type, :pcondition, :usertype)");
 			$sth->execute(array($host, $s->domain, (int)$s->port, (int)$s->socketType, (int)$s->type, $s->pcondition, (int)$s->usertype));
 		} catch (Exception $e) {}
