@@ -27,7 +27,7 @@ class check_email extends plugins {
 		parent::init();
 		if ($this->db) {
 			try {
-				$result = $pdo->query("SELECT 1 FROM `record` LIMIT 1");
+				$result = $this->db->query("SELECT 1 FROM `record` LIMIT 1");
 			} catch (Exception $e) {
 				$this->db->query("CREATE TABLE IF NOT EXISTS `record` (
 					`host` varchar(100) NOT NULL,
