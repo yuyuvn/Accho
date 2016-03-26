@@ -32,11 +32,11 @@ class check_email extends plugins {
 				$this->db->query("CREATE TABLE record (
 					host varchar(100) NOT NULL,
 					domain varchar(100) NOT NULL DEFAULT '???',
-					port int(11) NOT NULL DEFAULT '0',
-					socketType tinyint(4) NOT NULL DEFAULT '0',
-					type tinyint(4) NOT NULL DEFAULT '0',
+					port int NOT NULL DEFAULT '0',
+					socketType tinyint NOT NULL DEFAULT '0',
+					type tinyint NOT NULL DEFAULT '0',
 					pcondition text,
-					usertype tinyint(3) NOT NULL DEFAULT '0',
+					usertype tinyint NOT NULL DEFAULT '0',
 					PRIMARY KEY (host)
 				)");
 			}
